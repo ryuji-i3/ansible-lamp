@@ -1,0 +1,27 @@
+---
+- hosts: lamp
+  sudo : yes
+  tasks:
+    - name: install httpd
+      yum: name=httpd state=latest
+    - name: apache start / enable
+      service: name=httpd state=started enabled=yes
+    - name: install mysql repository
+      yum: name=http://dev.mysql.com/get/mysql57-community-release-el7-7.noarch.rpm state=present
+    - name: install mysql
+      yum: name=mysql-server state=latest
+    - name: mysql start / enable
+      service: name=mysqld state=started enabled=yes 
+    - name: install php
+      yum: name={{item}} state=latest
+      with_items:
+        - php
+        - php-devel
+        - php-mbstring
+        - php-mysql
+        - php-gd
+      notify:
+        - httpd restart
+  handlers:
+    - name: httpd restart
+      service: name=httpd state=restarted
